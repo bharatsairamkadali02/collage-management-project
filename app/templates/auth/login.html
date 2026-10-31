@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% set hide_navigation = true %}
+
+{% block title %}Sign In - CampusSphere CMS{% endblock %}
+
+{% block standalone_content %}
+<div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50/50 via-gray-50 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+  
+  <!-- Header Branding -->
+  <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 mb-4 transform hover:scale-105 transition-transform">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5"/>
+      </svg>
+    </div>
+    <h2 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+      CampusSphere
+    </h2>
+    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      Sign in to access your academic portal
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
+    <div class="bg-white dark:bg-gray-800 py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-gray-100 dark:border-gray-700/80">
+
+      <!-- Rate Limit Alert Banner -->
+      <div id="rate-limit-banner" class="{% if not rate_limited %}hidden{% endif %} mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-xs">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <span class="font-bold block text-sm mb-0.5">Too Many Failed Attempts</span>
+            <span>Security throttle active. Please wait <span id="rate-limit-seconds" class="font-bold underline">45</span> seconds before trying again.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Role Preset Selector for Testing/Demo -->
+      <div class="mb-6">
+        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Select Portal Role</label>
+        <div class="grid grid-cols-3 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl" role="tablist">
+          <button type="button" onclick="selectRole('admin', 'admin@college.edu', 'AdminPass123!')" class="role-tab active py-2 text-xs font-semibold rounded-lg bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all text-center">
+            Admin
+          </button>
+          <button type="button" onclick="selectRole('faculty', 'faculty.cs@college.edu', 'FacultyPass123!')" class="role-tab py-2 text-xs font-semibold rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all text-center">
+            Faculty
+          </button>
+          <button type="button" onclick="selectRole('student', 'john.doe@student.college.edu', 'StudentPass123!')" class="role-tab py-2 text-xs font-semibold rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all text-center">
+            Student
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" method="POST" action="{{ url_for('auth.login') if 'auth.login' in url_map else '/auth/login' }}" class="space-y-5">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+        <input type="hidden" name="role_hint" id="role-hint-input" value="admin">
+
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
+            Email or Roll Number
+          </label>
+          <div class="relative rounded-xl shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/>
+              </svg>
+            </div>
+            <input id="email" name="email" type="text" autocomplete="username" required value="admin@college.edu" class="block w-full pl-10 pr-3 py-2.5 sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+          </div>
+          {% if errors and errors.email %}
+            <p class="mt-1.5 text-xs text-rose-500 font-medium">{{ errors.email }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="password" class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              Password
+            </label>
+            <a href="#forgot" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              Forgot?
+            </a>
+          </div>
+          <div class="relative rounded-xl shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <input id="password" name="password" type="password" autocomplete="current-password" required value="AdminPass123!" class="block w-full pl-10 pr-10 py-2.5 sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+            <button type="button" id="toggle-password-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Toggle password visibility">
+              <svg id="eye-open" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="eye-closed" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+            </button>
+          </div>
+          {% if errors and errors.password %}
+            <p class="mt-1.5 text-xs text-rose-500 font-medium">{{ errors.password }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center">
+          <input id="remember_me" name="remember_me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-900">
+          <label for="remember_me" class="ml-2 block text-xs text-gray-700 dark:text-gray-300 font-medium">
+            Remember me on this trusted browser
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <button type="submit" id="login-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-600/30 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+            Sign In to Dashboard
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security & Help Links -->
+    <div class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+      Need portal access or forgot credentials? <a href="#helpdesk" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Contact Campus Helpdesk</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Role selector pre-fill helper
+  function selectRole(role, email, pass) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = pass;
+    document.getElementById('role-hint-input').value = role;
+
+    document.querySelectorAll('.role-tab').forEach(tab => {
+      tab.classList.remove('active', 'bg-white', 'dark:bg-gray-800', 'text-indigo-600', 'dark:text-indigo-400', 'shadow-sm');
+      tab.classList.add('text-gray-600', 'dark:text-gray-400');
+    });
+
+    const activeBtn = event.currentTarget;
+    activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+    activeBtn.classList.add('active', 'bg-white', 'dark:bg-gray-800', 'text-indigo-600', 'dark:text-indigo-400', 'shadow-sm');
+  }
+
+  // Password visibility toggle
+  const togglePassBtn = document.getElementById('toggle-password-btn');
+  const passInput = document.getElementById('password');
+  const eyeOpen = document.getElementById('eye-open');
+  const eyeClosed = document.getElementById('eye-closed');
+
+  if (togglePassBtn && passInput) {
+    togglePassBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      eyeOpen.classList.toggle('hidden', isPass);
+      eyeClosed.classList.toggle('hidden', !isPass);
+    });
+  }
+
+  // Handle rate-limit countdown if active
+  const rateLimitBanner = document.getElementById('rate-limit-banner');
+  const secondsEl = document.getElementById('rate-limit-seconds');
+  const submitBtn = document.getElementById('login-submit-btn');
+
+  if (rateLimitBanner && !rateLimitBanner.classList.contains('hidden') && secondsEl) {
+    let timeLeft = parseInt(secondsEl.textContent, 10) || 45;
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      secondsEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        rateLimitBanner.classList.add('hidden');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }, 1000);
+  }
+
+  // Submit button loading indicator
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', () => {
+      CMS.setButtonLoading(submitBtn, true, 'Signing in...');
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - CampusSphere CMS{% endblock %}
+{% block page_title %}Student Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Welcome Banner -->
+  <div class="p-6 bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 rounded-3xl text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-md">
+          Roll No: 21CS042
+        </span>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/80 text-white">
+          Active Student
+        </span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+        Welcome back, John Doe
+      </h1>
+      <p class="text-xs sm:text-sm text-indigo-100 mt-1 max-w-xl">
+        B.Tech Computer Science & Engineering &bull; Semester 5 &bull; Section A &bull; Batch 2023-2027
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <a href="{{ url_for('attendance.view') }}" class="px-4 py-2.5 rounded-xl bg-white text-indigo-700 text-xs font-extrabold hover:bg-indigo-50 shadow-md transition-all">
+        My Attendance
+      </a>
+      <a href="{{ url_for('results.view') }}" class="px-4 py-2.5 rounded-xl bg-indigo-900/60 hover:bg-indigo-900/90 text-white text-xs font-bold border border-white/20 transition-all">
+        My Results
+      </a>
+    </div>
+  </div>
+
+  <!-- Low Attendance Warning Alert (Shown if attendance < 75%) -->
+  <div id="low-attendance-alert" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
+    <div class="flex items-start gap-3.5">
+      <div class="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex-shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-bold">Subject Attendance Alert: CS402 (DBMS)</h4>
+          <span class="text-xs font-extrabold px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200">68.5% (Below 75%)</span>
+        </div>
+        <p class="text-xs text-amber-800 dark:text-amber-300 mt-1">
+          Your attendance in Database Management Systems is currently <strong>68.5%</strong>. You must attend the next <strong>4 consecutive lecture classes</strong> to restore your eligibility for final examinations.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Metrics Row: Attendance Ring + Quick Stats -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Overall Attendance Donut Card -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Aggregate Attendance</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Current Semester 5</p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+          Good Standing
+        </span>
+      </div>
+
+      <!-- Ring Chart Container -->
+      <div class="relative w-48 h-48 mx-auto my-3">
+        <canvas id="attendanceRingChart"></canvas>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-center">
+        <div>
+          <span class="text-xs text-gray-400 uppercase font-semibold">Attended</span>
+          <p class="text-lg font-black text-gray-800 dark:text-gray-100">142 Classes</p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-400 uppercase font-semibold">Total Held</span>
+          <p class="text-lg font-black text-gray-800 dark:text-gray-100">170 Classes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academics Performance Overview (2 cols) -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- Academic Score Badges (GPA cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cumulative CGPA</span>
+          <p class="mt-2 text-3xl font-black text-indigo-600 dark:text-indigo-400">8.74 <span class="text-sm font-semibold text-gray-400">/ 10</span></p>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400">Rank #4 in Branch</span>
+        </div>
+
+        <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Latest SGPA (Sem 4)</span>
+          <p class="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">8.90 <span class="text-sm font-semibold text-gray-400">/ 10</span></p>
+          <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">+0.32 improvement</span>
+        </div>
+
+        <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Credits Earned</span>
+          <p class="mt-2 text-3xl font-black text-gray-900 dark:text-white">92 <span class="text-sm font-semibold text-gray-400">/ 160</span></p>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400">On track for graduation</span>
+        </div>
+      </div>
+
+      <!-- Active / Upcoming Online Exams List -->
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white">Active & Scheduled Online Exams</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Take tests online in distraction-free mode</p>
+          </div>
+          <a href="{{ url_for('exams.list') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            View All Exams &rarr;
+          </a>
+        </div>
+
+        <div class="mt-4 space-y-3">
+          
+          <!-- Exam 1: Live Now -->
+          <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border-2 border-indigo-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-600 text-white">CS301</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">
+                  <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
+                  LIVE NOW
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white">Midterm 1: Trees, Graphs & Hash Tables</h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Duration: 60 Mins &bull; Total Marks: 50 &bull; 25 Questions</p>
+            </div>
+            <a href="{{ url_for('exams.take') }}" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-lg shadow-indigo-600/30 text-center transition-all">
+              Launch Exam Portal &rarr;
+            </a>
+          </div>
+
+          <!-- Exam 2: Scheduled -->
+          <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-purple-600 text-white">CS402</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                  Starts in 2 days
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white">DBMS Midterm: Relational Algebra & SQL</h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Scheduled: Nov 2, 2026 at 10:00 AM &bull; 45 Mins</p>
+            </div>
+            <button disabled class="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold cursor-not-allowed">
+              Not Started Yet
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Latest Semester Grades Table -->
+  <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white">Latest Published Semester Results (Semester 4)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Spring Term 2026 Transcript Overview</p>
+      </div>
+      <a href="{{ url_for('results.view') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+        Detailed Semester Transcripts &rarr;
+      </a>
+    </div>
+
+    <div class="overflow-x-auto mt-4">
+      <table class="w-full text-left text-xs">
+        <thead>
+          <tr class="text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+            <th class="py-3 px-3">Subject Code</th>
+            <th class="py-3 px-3">Subject Title</th>
+            <th class="py-3 px-3">Credits</th>
+            <th class="py-3 px-3">Marks Obtained</th>
+            <th class="py-3 px-3">Letter Grade</th>
+            <th class="py-3 px-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 font-medium text-gray-800 dark:text-gray-200">
+          <tr>
+            <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS401</td>
+            <td class="py-3 px-3">Design and Analysis of Algorithms</td>
+            <td class="py-3 px-3">4</td>
+            <td class="py-3 px-3">88 / 100</td>
+            <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">A+ (9.0)</td>
+            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">PASS</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS402</td>
+            <td class="py-3 px-3">Operating Systems Concepts</td>
+            <td class="py-3 px-3">4</td>
+            <td class="py-3 px-3">82 / 100</td>
+            <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">A (8.5)</td>
+            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">PASS</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS403</td>
+            <td class="py-3 px-3">Theory of Computation</td>
+            <td class="py-3 px-3">3</td>
+            <td class="py-3 px-3">91 / 100</td>
+            <td class="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">O (10.0)</td>
+            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">PASS</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS404</td>
+            <td class="py-3 px-3">Computer Organization & Architecture</td>
+            <td class="py-3 px-3">3</td>
+            <td class="py-3 px-3">78 / 100</td>
+            <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">B+ (8.0)</td>
+            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize student attendance donut ring (84%)
+    if (window.CMSCharts) {
+      CMSCharts.initAttendanceRing('attendanceRingChart', 84);
+    }
+  });
+</script>
+{% endblock %}

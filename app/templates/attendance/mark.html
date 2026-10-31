@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block title %}Mark Attendance - CampusSphere CMS{% endblock %}
+{% block page_title %}Attendance Recording System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header & Live Broadcast Status -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          Mark Daily Attendance
+        </h1>
+        <!-- Animated Live Dot -->
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          LIVE
+        </span>
+      </div>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+        Record and synchronize lecture presence directly to the university academic ledger.
+      </p>
+    </div>
+
+    <!-- Quick Bulk Action Buttons -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button type="button" id="btn-mark-all-present" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 rounded-xl hover:bg-emerald-100 transition-colors shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>Mark All Present</span>
+      </button>
+
+      <button type="button" id="btn-mark-all-absent" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 rounded-xl hover:bg-rose-100 transition-colors shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        <span>Mark All Absent</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Selection / Filter Bar -->
+  <form id="attendance-form" method="POST" action="{{ url_for('attendance.mark') if 'attendance.mark' in url_map else '/attendance/save' }}" class="space-y-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Select Course *</label>
+        <select name="course_id" id="attendance-course-select" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          <option value="CS301" selected>CS301 - Data Structures & Algorithms</option>
+          <option value="CS402">CS402 - Database Management Systems</option>
+          <option value="CS408">CS408 - Cloud Computing & DevOps</option>
+          <option value="CS501">CS501 - Advanced Machine Learning</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Lecture Date *</label>
+        <input type="date" name="date" id="attendance-date" value="2026-10-30" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Semester & Section</label>
+        <select name="semester" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          <option value="5_A" selected>Semester 5 - Section A</option>
+          <option value="5_B">Semester 5 - Section B</option>
+          <option value="7_A">Semester 7 - Section A</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Quick Filter Student</label>
+        <input type="text" id="attendance-search" placeholder="Type roll no or name..." class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+    </div>
+
+    <!-- Live Attendance Metrics Summary Ribbon -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 bg-gray-100 dark:bg-gray-800/60 rounded-2xl border border-gray-200 dark:border-gray-700/60 text-center">
+      <div class="p-2">
+        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Students</span>
+        <p class="text-xl font-black text-gray-900 dark:text-white" id="stat-total-count">6</p>
+      </div>
+      <div class="p-2">
+        <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Present (✓)</span>
+        <p class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="stat-present-count">5</p>
+      </div>
+      <div class="p-2">
+        <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Late (⏰)</span>
+        <p class="text-xl font-black text-amber-600 dark:text-amber-400" id="stat-late-count">1</p>
+      </div>
+      <div class="p-2">
+        <span class="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">Absent (✗)</span>
+        <p class="text-xl font-black text-rose-600 dark:text-rose-400" id="stat-absent-count">0</p>
+      </div>
+      <div class="p-2 col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700">
+        <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Session Rate</span>
+        <p class="text-xl font-black text-indigo-600 dark:text-indigo-400" id="stat-attendance-pct">92%</p>
+      </div>
+    </div>
+
+    <!-- Students Attendance Roster Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden" id="attendance-table-container">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs" id="attendance-table">
+          <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+            <tr>
+              <th class="py-3.5 px-4">Roll Number</th>
+              <th class="py-3.5 px-4">Student Name</th>
+              <th class="py-3.5 px-4 text-center">Aggregate Attendance</th>
+              <th class="py-3.5 px-4 text-center">Status Toggles</th>
+              <th class="py-3.5 px-4">Notes / Remarks</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 font-medium">
+            
+            <!-- Student 1 -->
+            <tr data-attendance-row data-student-id="1" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS042</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">John Doe</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">84.2%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_1" class="status-input" value="present">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm" aria-pressed="true">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_1" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+            <!-- Student 2 -->
+            <tr data-attendance-row data-student-id="2" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS003</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Aanya Sharma</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">93.8%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_2" class="status-input" value="present">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm" aria-pressed="true">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_2" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+            <!-- Student 3: Marked Late -->
+            <tr data-attendance-row data-student-id="3" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS015</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Arjun Nair</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">79.5%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_3" class="status-input" value="late">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-white shadow-sm" aria-pressed="true">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_3" value="Arrived 15m late" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+            <!-- Student 4 -->
+            <tr data-attendance-row data-student-id="4" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS034</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Divya Sundaram</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">88.0%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_4" class="status-input" value="present">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm" aria-pressed="true">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_4" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+            <!-- Student 5 -->
+            <tr data-attendance-row data-student-id="5" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS058</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Meera Kapoor</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">91.3%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_5" class="status-input" value="present">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm" aria-pressed="true">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_5" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+            <!-- Student 6 -->
+            <tr data-attendance-row data-student-id="6" class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS077</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Rohan Verma</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300">67.4%</span>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="hidden" name="status_6" class="status-input" value="present">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" data-status-btn="present" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm" aria-pressed="true">
+                    ✓ Present
+                  </button>
+                  <button type="button" data-status-btn="late" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ⏰ Late
+                  </button>
+                  <button type="button" data-status-btn="absent" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-gray-200" aria-pressed="false">
+                    ✗ Absent
+                  </button>
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <input type="text" name="remarks_6" class="remarks-input w-full px-2.5 py-1 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200" placeholder="Optional remark...">
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Search empty state -->
+      <div id="attendance-empty-search" class="hidden p-8 text-center text-xs text-gray-400">
+        No students matched your search filter.
+      </div>
+    </div>
+
+    <!-- Sticky Bottom Save Bar -->
+    <div class="sticky bottom-4 z-20 p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-xs text-gray-600 dark:text-gray-300">
+        Recording for <strong>CS301</strong> &bull; Total: <strong>6 students</strong> &bull; Changes will sync via Socket.IO
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="reset" class="px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
+          Reset Form
+        </button>
+        <button type="submit" id="save-attendance-btn" class="px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span>Save & Sync Attendance</span>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/attendance.js') }}"></script>
+{% endblock %}

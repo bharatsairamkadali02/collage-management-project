@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}My Attendance - CampusSphere CMS{% endblock %}
+{% block page_title %}Student Attendance Record{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        My Attendance Record
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        Session-by-session telemetry for Semester 5 &bull; Minimum statutory requirement: <strong>75%</strong>
+      </p>
+    </div>
+    <div class="flex items-center gap-3 no-print">
+      <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        <span>Print Summary</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Low Attendance Warning Banner (Appears if any subject < 75%) -->
+  <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
+    <div class="flex items-start gap-3.5">
+      <div class="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex-shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h4 class="text-sm font-bold">Attendance Warning Notice</h4>
+          <span class="text-[11px] font-black px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200">Action Needed</span>
+        </div>
+        <p class="text-xs text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
+          Your attendance in <strong>CS402: Database Management Systems</strong> is currently <strong>68.5%</strong>, which is below the mandatory 75% threshold required to appear in final exams. You must attend at least <strong>4 consecutive upcoming classes</strong> in this course to become eligible.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Overall Percentage</span>
+      <p class="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">84.2%</p>
+      <span class="text-[11px] text-emerald-600 font-semibold">+9.2% above statutory min</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Classes Attended</span>
+      <p class="mt-2 text-3xl font-black text-gray-900 dark:text-white">142</p>
+      <span class="text-[11px] text-gray-400">Lectures + Practical labs</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Conducted</span>
+      <p class="mt-2 text-3xl font-black text-gray-900 dark:text-white">170</p>
+      <span class="text-[11px] text-gray-400">Across 5 subjects so far</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Absences & Leaves</span>
+      <p class="mt-2 text-3xl font-black text-rose-600 dark:text-rose-400">22</p>
+      <span class="text-[11px] text-gray-400">6 Late entries counted</span>
+    </div>
+  </div>
+
+  <!-- Subject-wise Attendance Breakdown Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8">
+    <div class="pb-4 border-b border-gray-100 dark:border-gray-700">
+      <h3 class="text-base font-bold text-gray-900 dark:text-white">Subject-wise Attendance Breakdown</h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400">Semester 5 Ongoing Courses</p>
+    </div>
+
+    <div class="overflow-x-auto mt-4">
+      <table class="w-full text-left text-xs">
+        <thead class="text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+          <tr>
+            <th class="py-3 px-3">Subject Code</th>
+            <th class="py-3 px-3">Subject Name</th>
+            <th class="py-3 px-3">Instructor</th>
+            <th class="py-3 px-3 text-center">Total Held</th>
+            <th class="py-3 px-3 text-center">Attended</th>
+            <th class="py-3 px-3">Attendance %</th>
+            <th class="py-3 px-3 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700 font-medium">
+          
+          <!-- Subject 1 -->
+          <tr>
+            <td class="py-3.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS301</td>
+            <td class="py-3.5 px-3 font-semibold text-gray-900 dark:text-white">Data Structures & Algorithms</td>
+            <td class="py-3.5 px-3 text-gray-500">Prof. Alan Turing</td>
+            <td class="py-3.5 px-3 text-center">38</td>
+            <td class="py-3.5 px-3 text-center font-bold">34</td>
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 89.4%"></div>
+                </div>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">89.4%</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">SAFE</span>
+            </td>
+          </tr>
+
+          <!-- Subject 2: Low Attendance -->
+          <tr class="bg-amber-50/40 dark:bg-amber-950/20">
+            <td class="py-3.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS402</td>
+            <td class="py-3.5 px-3 font-semibold text-gray-900 dark:text-white">Database Management Systems</td>
+            <td class="py-3.5 px-3 text-gray-500">Prof. Edgar Codd</td>
+            <td class="py-3.5 px-3 text-center">35</td>
+            <td class="py-3.5 px-3 text-center font-bold">24</td>
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-amber-500 h-2 rounded-full" style="width: 68.5%"></div>
+                </div>
+                <span class="font-bold text-amber-600 dark:text-amber-400">68.5%</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">WARNING</span>
+            </td>
+          </tr>
+
+          <!-- Subject 3 -->
+          <tr>
+            <td class="py-3.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS408</td>
+            <td class="py-3.5 px-3 font-semibold text-gray-900 dark:text-white">Cloud Computing Architecture</td>
+            <td class="py-3.5 px-3 text-gray-500">Dr. Werner Vogels</td>
+            <td class="py-3.5 px-3 text-center">32</td>
+            <td class="py-3.5 px-3 text-center font-bold">29</td>
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 90.6%"></div>
+                </div>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">90.6%</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">SAFE</span>
+            </td>
+          </tr>
+
+          <!-- Subject 4 -->
+          <tr>
+            <td class="py-3.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">MA301</td>
+            <td class="py-3.5 px-3 font-semibold text-gray-900 dark:text-white">Discrete Mathematical Structures</td>
+            <td class="py-3.5 px-3 text-gray-500">Prof. Ada Lovelace</td>
+            <td class="py-3.5 px-3 text-center">35</td>
+            <td class="py-3.5 px-3 text-center font-bold">30</td>
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 85.7%"></div>
+                </div>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">85.7%</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">SAFE</span>
+            </td>
+          </tr>
+
+          <!-- Subject 5 -->
+          <tr>
+            <td class="py-3.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS302</td>
+            <td class="py-3.5 px-3 font-semibold text-gray-900 dark:text-white">Algorithms Laboratory</td>
+            <td class="py-3.5 px-3 text-gray-500">Prof. Alan Turing</td>
+            <td class="py-3.5 px-3 text-center">30</td>
+            <td class="py-3.5 px-3 text-center font-bold">25</td>
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 83.3%"></div>
+                </div>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">83.3%</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">SAFE</span>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Interactive Monthly Calendar View -->
+  <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white">Attendance Calendar: October 2026</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Daily presence audit map</p>
+      </div>
+
+      <!-- Legend -->
+      <div class="flex flex-wrap items-center gap-3 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Present</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Late</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Absent</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600"></span> Weekend / Holiday</span>
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="mt-6 grid grid-cols-7 gap-2 sm:gap-3 text-center">
+      <!-- Weekday headers -->
+      <div class="text-[11px] font-bold text-gray-400 py-2">MON</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">TUE</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">WED</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">THU</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">FRI</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">SAT</div>
+      <div class="text-[11px] font-bold text-gray-400 py-2">SUN</div>
+
+      <!-- Days 1 - 31 -->
+      <!-- Empty padding for Oct 1 (Thu) -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-900/30 opacity-40">28</div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-900/30 opacity-40">29</div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-900/30 opacity-40">30</div>
+      
+      <!-- Oct 1 -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+        <span class="text-xs font-bold">1</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span>
+      </div>
+      <!-- Oct 2: Gandhi Jayanti Holiday -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center">
+        <span class="text-xs font-bold">2</span>
+        <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 mt-1"></span>
+      </div>
+      <!-- Weekend -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">3</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">4</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+
+      <!-- Week 2 -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">5</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">6</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">7</span><span class="w-2 h-2 rounded-full bg-amber-500 mt-1" title="Late"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">8</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">9</span><span class="w-2 h-2 rounded-full bg-rose-500 mt-1" title="Absent"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">10</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">11</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+
+      <!-- Week 3 -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">12</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">13</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">14</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">15</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">16</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">17</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">18</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+
+      <!-- Week 4 -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">19</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">20</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">21</span><span class="w-2 h-2 rounded-full bg-amber-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">22</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">23</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">24</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-gray-700/20 text-gray-400 flex flex-col items-center"><span class="text-xs font-bold">25</span><span class="w-2 h-2 rounded-full bg-gray-300 mt-1"></span></div>
+
+      <!-- Week 5 -->
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">26</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">27</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">28</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">29</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+      <!-- Today (Oct 30) -->
+      <div class="p-2 sm:p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border-2 border-indigo-500 flex flex-col items-center">
+        <span class="text-xs font-black text-indigo-600 dark:text-indigo-400">30</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span>
+      </div>
+      <div class="p-2 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700 flex flex-col items-center"><span class="text-xs font-bold">31</span><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></span></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

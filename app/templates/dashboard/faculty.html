@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Dashboard - CampusSphere CMS{% endblock %}
+{% block page_title %}Faculty Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        Welcome back, Prof. Alan Turing
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        Department of Computer Science & Engineering &bull; Semester 5 & 7 Advisor
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{{ url_for('attendance.mark') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span>Take Daily Attendance</span>
+      </a>
+      <a href="{{ url_for('exams.editor') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl shadow-sm transition-all">
+        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>New Exam</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Faculty Quick Metrics Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned Courses</span>
+      <div class="mt-3 flex items-baseline justify-between">
+        <span class="text-3xl font-black text-gray-900 dark:text-white">4</span>
+        <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">14 Credits Total</span>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">CS301, CS402, CS408, CS501</p>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Students Under Mentorship</span>
+      <div class="mt-3 flex items-baseline justify-between">
+        <span class="text-3xl font-black text-gray-900 dark:text-white">218</span>
+        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">92% Avg Attendance</span>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Across 3 academic sections</p>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Classes Today</span>
+      <div class="mt-3 flex items-baseline justify-between">
+        <span class="text-3xl font-black text-gray-900 dark:text-white">3</span>
+        <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Next: 11:30 AM</span>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Room 304 &bull; CS301 Lecture</p>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Evaluations</span>
+      <div class="mt-3 flex items-baseline justify-between">
+        <span class="text-3xl font-black text-rose-600 dark:text-rose-400">14</span>
+        <span class="text-xs font-bold text-rose-600 dark:text-rose-400">Action Required</span>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lab assignments awaiting grading</p>
+    </div>
+  </div>
+
+  <!-- My Courses Cards -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-gray-900 dark:text-white">My Active Courses</h2>
+      <span class="text-xs text-gray-500 dark:text-gray-400">Current Semester: Fall 2026</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      
+      <!-- Course 1 -->
+      <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col justify-between hover:border-indigo-400 transition-all">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+              CS301
+            </span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Sem 5 &bull; Sec A</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white leading-snug">
+            Data Structures & Algorithms
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">62 Enrolled Students</p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+          <a href="{{ url_for('attendance.mark') }}?course=CS301" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors">
+            Attendance
+          </a>
+          <a href="{{ url_for('results.manage') }}?course=CS301" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Results
+          </a>
+        </div>
+      </div>
+
+      <!-- Course 2 -->
+      <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col justify-between hover:border-indigo-400 transition-all">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+              CS402
+            </span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Sem 7 &bull; Sec B</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white leading-snug">
+            Database Management Systems
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">54 Enrolled Students</p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+          <a href="{{ url_for('attendance.mark') }}?course=CS402" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors">
+            Attendance
+          </a>
+          <a href="{{ url_for('results.manage') }}?course=CS402" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Results
+          </a>
+        </div>
+      </div>
+
+      <!-- Course 3 -->
+      <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col justify-between hover:border-indigo-400 transition-all">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+              CS408
+            </span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Sem 7 &bull; Elective</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white leading-snug">
+            Cloud Computing & DevOps
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">48 Enrolled Students</p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+          <a href="{{ url_for('attendance.mark') }}?course=CS408" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors">
+            Attendance
+          </a>
+          <a href="{{ url_for('results.manage') }}?course=CS408" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Results
+          </a>
+        </div>
+      </div>
+
+      <!-- Course 4 -->
+      <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col justify-between hover:border-indigo-400 transition-all">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+              CS501
+            </span>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">M.Tech &bull; Sem 1</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white leading-snug">
+            Advanced Machine Learning
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">54 Enrolled Students</p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+          <a href="{{ url_for('attendance.mark') }}?course=CS501" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors">
+            Attendance
+          </a>
+          <a href="{{ url_for('results.manage') }}?course=CS501" class="flex-1 text-center py-2 px-2 text-xs font-bold rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Results
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Row: My Active Exams & Recent Submissions -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- My Active Exams -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/80">
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">My Active & Scheduled Exams</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Assessments managed by you</p>
+        </div>
+        <a href="{{ url_for('exams.editor') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+          + Question Bank
+        </a>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <!-- Exam 1 -->
+        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">CS301</span>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white">Midterm 1: Trees & Graphs</h4>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+              <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+              LIVE
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <span>Submissions: <strong>48 / 62</strong></span>
+            <span>Ends in: <strong>24 mins</strong></span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div class="bg-indigo-600 h-2 rounded-full" style="width: 77%"></div>
+          </div>
+        </div>
+
+        <!-- Exam 2 -->
+        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs font-bold text-purple-600 dark:text-purple-400">CS402</span>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white">SQL & Query Optimization Quiz</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
+              Scheduled
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>Starts: Nov 2, 10:00 AM</span>
+            <span>Duration: 45 Mins</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Submissions To Grade -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/80">
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Recent Lab Submissions</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Awaiting faculty review</p>
+        </div>
+        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline">
+          View All (14)
+        </span>
+      </div>
+
+      <div class="mt-4 divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="py-3 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-900 dark:text-white">Rahul Verma (21CS042)</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">CS301 &bull; Binary Search Tree Implementation</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-gray-400">12m ago</span>
+            <button type="button" onclick="CMS.showToast('Opening grading panel for Rahul Verma', 'info')" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors">
+              Grade
+            </button>
+          </div>
+        </div>
+
+        <div class="py-3 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-900 dark:text-white">Sneha Patel (21CS089)</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">CS402 &bull; Relational Schema Normalization</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-gray-400">35m ago</span>
+            <button type="button" onclick="CMS.showToast('Opening grading panel for Sneha Patel', 'info')" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors">
+              Grade
+            </button>
+          </div>
+        </div>
+
+        <div class="py-3 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-900 dark:text-white">Arjun Nair (21CS015)</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">CS301 &bull; Graph Shortest Path Dijkstra</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-gray-400">1h ago</span>
+            <button type="button" onclick="CMS.showToast('Opening grading panel for Arjun Nair', 'info')" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors">
+              Grade
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

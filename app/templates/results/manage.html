@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Examination Results - CampusSphere CMS{% endblock %}
+{% block page_title %}Academic Results Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        Manage Course Results & Grades
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        Record marks, calculate SGPA points, and publish official academic transcripts.
+      </p>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button type="button" onclick="CMS.showToast('Downloading CSV marksheet template...', 'info')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span>CSV Template</span>
+      </button>
+
+      <button type="button" onclick="CMS.showToast('Ready to upload CSV marksheet...', 'info')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        <span>Upload Marks CSV</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Course & Exam Selection Form -->
+  <form id="results-manage-form" method="POST" action="{{ url_for('results.manage') if 'results.manage' in url_map else '/results/save' }}" class="space-y-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Course / Subject *</label>
+        <select name="course_code" id="results-course-select" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          <option value="CS301" selected>CS301 - Data Structures & Algorithms</option>
+          <option value="CS402">CS402 - Database Management Systems</option>
+          <option value="CS408">CS408 - Cloud Computing Architecture</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Assessment Type *</label>
+        <select name="assessment_type" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          <option value="midterm_1" selected>Midterm Examination 1</option>
+          <option value="midterm_2">Midterm Examination 2</option>
+          <option value="lab_internal">Laboratory Continuous Assessment</option>
+          <option value="end_semester">Final End-Semester Examination</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Semester & Section</label>
+        <select name="semester" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          <option value="5_A" selected>Semester 5 - Section A</option>
+          <option value="5_B">Semester 5 - Section B</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Maximum Marks</label>
+        <input type="number" id="max-marks-input" name="max_marks" value="100" class="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+    </div>
+
+    <!-- Live Grade Scale Reference Legend -->
+    <div class="p-3 bg-indigo-50/60 dark:bg-indigo-950/40 rounded-2xl border border-indigo-200 dark:border-indigo-800/60 flex flex-wrap items-center justify-between gap-3 text-xs text-indigo-900 dark:text-indigo-200">
+      <span class="font-bold flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Automated Grading Scale:
+      </span>
+      <div class="flex flex-wrap items-center gap-3">
+        <span><strong>O:</strong> &ge; 90% (10.0)</span>
+        <span><strong>A+:</strong> 80-89% (9.0)</span>
+        <span><strong>A:</strong> 70-79% (8.0)</span>
+        <span><strong>B+:</strong> 60-69% (7.0)</span>
+        <span><strong>B:</strong> 50-59% (6.0)</span>
+        <span class="text-rose-600 dark:text-rose-400"><strong>F:</strong> &lt; 50% (Fail)</span>
+      </div>
+    </div>
+
+    <!-- Student Marks Entry Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs" id="marks-table">
+          <thead class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+            <tr>
+              <th class="py-3.5 px-4">Roll Number</th>
+              <th class="py-3.5 px-4">Student Name</th>
+              <th class="py-3.5 px-4 text-center">Internal Marks (30)</th>
+              <th class="py-3.5 px-4 text-center">Exam Marks (70)</th>
+              <th class="py-3.5 px-4 text-center">Total (100)</th>
+              <th class="py-3.5 px-4 text-center">Grade</th>
+              <th class="py-3.5 px-4 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700 font-medium">
+
+            <!-- Student 1 -->
+            <tr data-marks-row class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS042</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">John Doe</td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="internal_1" value="27" min="0" max="30" class="marks-internal w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="exam_1" value="61" min="0" max="70" class="marks-exam w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center font-black text-sm text-gray-900 dark:text-white marks-total">
+                88
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                  A+ (9.0)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200">
+                  PASS
+                </span>
+              </td>
+            </tr>
+
+            <!-- Student 2 -->
+            <tr data-marks-row class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS003</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Aanya Sharma</td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="internal_2" value="29" min="0" max="30" class="marks-internal w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="exam_2" value="65" min="0" max="70" class="marks-exam w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center font-black text-sm text-gray-900 dark:text-white marks-total">
+                94
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                  O (10.0)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200">
+                  PASS
+                </span>
+              </td>
+            </tr>
+
+            <!-- Student 3 -->
+            <tr data-marks-row class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS015</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Arjun Nair</td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="internal_3" value="24" min="0" max="30" class="marks-internal w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="exam_3" value="52" min="0" max="70" class="marks-exam w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center font-black text-sm text-gray-900 dark:text-white marks-total">
+                76
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">
+                  A (8.0)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200">
+                  PASS
+                </span>
+              </td>
+            </tr>
+
+            <!-- Student 4: Borderline / Needs Improvement -->
+            <tr data-marks-row class="hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS077</td>
+              <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">Rohan Verma</td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="internal_4" value="14" min="0" max="30" class="marks-internal w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <input type="number" name="exam_4" value="32" min="0" max="70" class="marks-exam w-20 px-2.5 py-1.5 text-center text-xs font-bold bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </td>
+              <td class="py-3.5 px-4 text-center font-black text-sm text-rose-600 dark:text-rose-400 marks-total">
+                46
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300">
+                  F (0.0)
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200">
+                  REAPPEAR
+                </span>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        All modifications trigger real-time SGPA updates for enrolled students.
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button type="submit" name="action" value="draft" class="px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 rounded-xl transition-colors">
+          Save Draft
+        </button>
+        <button type="button" onclick="confirmPublishResults()" class="px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Publish Official Results</span>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Live marks calculation and grade allocation
+  document.querySelectorAll('[data-marks-row]').forEach(row => {
+    const internalInput = row.querySelector('.marks-internal');
+    const examInput = row.querySelector('.marks-exam');
+    const totalEl = row.querySelector('.marks-total');
+    const gradeEl = row.querySelector('.marks-grade');
+    const statusEl = row.querySelector('.marks-status');
+
+    function recalculate() {
+      const internal = parseFloat(internalInput.value) || 0;
+      const exam = parseFloat(examInput.value) || 0;
+      const total = internal + exam;
+      totalEl.textContent = total;
+
+      if (total >= 90) {
+        gradeEl.textContent = 'O (10.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300';
+        statusEl.textContent = 'PASS';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else if (total >= 80) {
+        gradeEl.textContent = 'A+ (9.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300';
+        statusEl.textContent = 'PASS';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else if (total >= 70) {
+        gradeEl.textContent = 'A (8.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300';
+        statusEl.textContent = 'PASS';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else if (total >= 60) {
+        gradeEl.textContent = 'B+ (7.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300';
+        statusEl.textContent = 'PASS';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else if (total >= 50) {
+        gradeEl.textContent = 'B (6.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300';
+        statusEl.textContent = 'PASS';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+      } else {
+        gradeEl.textContent = 'F (0.0)';
+        gradeEl.className = 'marks-grade px-2.5 py-1 rounded-lg text-xs font-black bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300';
+        statusEl.textContent = 'REAPPEAR';
+        statusEl.className = 'marks-status px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200';
+      }
+    }
+
+    internalInput.addEventListener('input', recalculate);
+    examInput.addEventListener('input', recalculate);
+  });
+
+  function confirmPublishResults() {
+    CMS.showConfirmModal({
+      title: 'Publish Official Results',
+      message: 'Are you sure you want to publish these examination marks? This will emit real-time notifications to all enrolled students and record these grades in the university registrar.',
+      confirmText: 'Publish Now',
+      confirmClass: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+      onConfirm: async () => {
+        await new Promise(r => setTimeout(r, 600));
+        CMS.showToast('Results published successfully and broadcast via Socket.IO!', 'success');
+        if (window.cmsSocket && window.cmsSocket.connected) {
+          window.cmsSocket.emit('result_updated', {
+            course: 'CS301',
+            message: 'Results published for CS301 (Data Structures)'
+          });
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

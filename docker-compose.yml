@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: cms-dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    ports:
+      - "8000:8000"
+    working_dir: /home/dynamodblocal
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
+    networks:
+      - cms-network
+
+  app:
+    build: .
+    container_name: cms-backend-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=docker-compose-secret-key-for-development-purposes
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_USERS=cms_users
+      - DYNAMODB_TABLE_STUDENTS=cms_students
+      - DYNAMODB_TABLE_ATTENDANCE=cms_attendance
+      - DYNAMODB_TABLE_RESULTS=cms_results
+      - DYNAMODB_TABLE_EXAMS=cms_exams
+      - DYNAMODB_TABLE_QUESTIONS=cms_questions
+      - DYNAMODB_TABLE_SUBMISSIONS=cms_submissions
+      - DYNAMODB_TABLE_AUDIT_LOGS=cms_audit_logs
+      - S3_BUCKET_NAME=cms-local-bucket
+    depends_on:
+      - dynamodb-local
+    networks:
+      - cms-network
+
+volumes:
+  dynamodb_data:
+
+networks:
+  cms-network:
+    driver: bridge

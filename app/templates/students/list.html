@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Directory - CampusSphere CMS{% endblock %}
+{% block page_title %}Student Directory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header & Role-gated Action Buttons -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        Enrolled Students
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        Manage student profiles, enrollments, credentials, and academic standing.
+      </p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3">
+      {% if current_user and current_user.role in ['admin', 'faculty'] %}
+        <button type="button" onclick="CMS.showToast('Ready to import student roster CSV...', 'info')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl shadow-sm transition-all">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Import CSV</span>
+        </button>
+
+        <a href="{{ url_for('students.form') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+          <span>+ Add Student</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex flex-col md:flex-row md:items-center gap-4">
+    <!-- Search Bar -->
+    <div class="relative flex-1">
+      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+      <input type="text" id="student-search-input" placeholder="Search by student name, roll number, or email..." class="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+    </div>
+
+    <!-- Filter Dropdowns -->
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Department Filter -->
+      <select id="filter-department" class="px-3 py-2 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">All Departments</option>
+        <option value="CSE">Computer Science</option>
+        <option value="ECE">Electronics & Comm</option>
+        <option value="MECH">Mechanical Eng</option>
+        <option value="CIVIL">Civil Eng</option>
+      </select>
+
+      <!-- Semester Filter -->
+      <select id="filter-semester" class="px-3 py-2 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">All Semesters</option>
+        <option value="1">Semester 1</option>
+        <option value="3">Semester 3</option>
+        <option value="5" selected>Semester 5</option>
+        <option value="7">Semester 7</option>
+      </select>
+
+      <!-- Status Filter -->
+      <select id="filter-status" class="px-3 py-2 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="leave">On Leave</option>
+        <option value="graduated">Graduated</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Students Data Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs" id="students-table">
+        <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+          <tr>
+            <th class="py-3.5 px-4 w-12 text-center">
+              <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            </th>
+            <th class="py-3.5 px-4">Student</th>
+            <th class="py-3.5 px-4">Roll Number</th>
+            <th class="py-3.5 px-4">Branch & Sem</th>
+            <th class="py-3.5 px-4">Contact</th>
+            <th class="py-3.5 px-4 text-center">Attendance %</th>
+            <th class="py-3.5 px-4 text-center">Status</th>
+            <th class="py-3.5 px-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 font-medium text-gray-800 dark:text-gray-200">
+          
+          <!-- Row 1 -->
+          <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors">
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
+                  JD
+                </div>
+                <div>
+                  <a href="{{ url_for('students.profile') }}" class="font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                    John Doe
+                  </a>
+                  <p class="text-[11px] text-gray-400">john.doe@student.college.edu</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS042</td>
+            <td class="py-3.5 px-4">
+              <div>CSE &bull; Sem 5</div>
+              <div class="text-[11px] text-gray-400">Section A</div>
+            </td>
+            <td class="py-3.5 px-4 text-gray-500 dark:text-gray-400">+1 (555) 234-5678</td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                84.2%
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                ACTIVE
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{{ url_for('students.profile') }}" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="View Profile">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </a>
+                <a href="{{ url_for('students.form') }}?edit=21CS042" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Edit Student">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </a>
+                <button type="button" onclick="confirmDeleteStudent('John Doe (21CS042)')" class="p-1.5 text-gray-500 hover:text-rose-600 rounded-lg transition-colors" title="Delete Student">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors">
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs">
+                  AS
+                </div>
+                <div>
+                  <a href="{{ url_for('students.profile') }}" class="font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                    Aanya Sharma
+                  </a>
+                  <p class="text-[11px] text-gray-400">aanya.sharma@student.college.edu</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS003</td>
+            <td class="py-3.5 px-4">
+              <div>CSE &bull; Sem 5</div>
+              <div class="text-[11px] text-gray-400">Section A</div>
+            </td>
+            <td class="py-3.5 px-4 text-gray-500 dark:text-gray-400">+1 (555) 890-1234</td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                93.8%
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                ACTIVE
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{{ url_for('students.profile') }}" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
+                <a href="{{ url_for('students.form') }}?edit=21CS003" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
+                <button type="button" onclick="confirmDeleteStudent('Aanya Sharma (21CS003)')" class="p-1.5 text-gray-500 hover:text-rose-600 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: Low Attendance Warning -->
+          <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors">
+            <td class="py-3.5 px-4 text-center">
+              <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center text-xs">
+                  RV
+                </div>
+                <div>
+                  <a href="{{ url_for('students.profile') }}" class="font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                    Rohan Verma
+                  </a>
+                  <p class="text-[11px] text-gray-400">rohan.verma@student.college.edu</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">21CS077</td>
+            <td class="py-3.5 px-4">
+              <div>CSE &bull; Sem 5</div>
+              <div class="text-[11px] text-gray-400">Section B</div>
+            </td>
+            <td class="py-3.5 px-4 text-gray-500 dark:text-gray-400">+1 (555) 432-8765</td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300">
+                67.4%
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                WARNING
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{{ url_for('students.profile') }}" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
+                <a href="{{ url_for('students.form') }}?edit=21CS077" class="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
+                <button type="button" onclick="confirmDeleteStudent('Rohan Verma (21CS077)')" class="p-1.5 text-gray-500 hover:text-rose-600 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="px-5 py-4 border-t border-gray-100 dark:border-gray-700/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+      <span>Showing <strong>1</strong> to <strong>3</strong> of <strong>1,850</strong> students</span>
+      <div class="flex items-center gap-1.5">
+        <button type="button" disabled class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 font-bold opacity-50 cursor-not-allowed">Previous</button>
+        <button type="button" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">1</button>
+        <button type="button" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">2</button>
+        <button type="button" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">3</button>
+        <span class="px-1 text-gray-400">...</span>
+        <button type="button" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">Next</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function confirmDeleteStudent(studentName) {
+    CMS.showConfirmModal({
+      title: 'Delete Student Record',
+      message: `Are you sure you want to permanently delete the profile for ${studentName}? This will remove all their enrollments and attendance records.`,
+      confirmText: 'Delete Record',
+      confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
+      onConfirm: async () => {
+        await new Promise(r => setTimeout(r, 600));
+        CMS.showToast(`Student ${studentName} successfully removed.`, 'success');
+      }
+    });
+  }
+
+  // Live client-side search filtering
+  document.getElementById('student-search-input')?.addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('#students-table tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+</script>
+{% endblock %}

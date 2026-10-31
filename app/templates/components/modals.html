@@ -1,0 +1,76 @@
+{# Reusable Modals Component #}
+
+<!-- 1. Generic Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+  <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 transform transition-all">
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 id="confirm-modal-title" data-confirm-title class="text-base font-bold text-gray-900 dark:text-white">
+          Confirm Action
+        </h3>
+        <p data-confirm-message class="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          Are you sure you want to proceed? This action may not be reversible.
+        </p>
+      </div>
+    </div>
+    <div class="mt-6 flex items-center justify-end gap-3">
+      <button type="button" data-cancel-btn class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
+        Cancel
+      </button>
+      <button type="button" data-confirm-btn class="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-colors">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Exam Submission Confirmation Modal -->
+<div id="exam-submit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true">
+  <div class="relative w-full max-w-lg p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700">
+    <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-700">
+      <div class="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/50 text-amber-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Final Exam Submission</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Review your attempt summary before submitting</p>
+      </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-3 gap-3 my-5">
+      <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-center">
+        <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400 block" data-modal-answered>0</span>
+        <span class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">Answered</span>
+      </div>
+      <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 text-center">
+        <span class="text-2xl font-black text-rose-600 dark:text-rose-400 block" data-modal-unanswered>0</span>
+        <span class="text-[11px] font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wide">Unanswered</span>
+      </div>
+      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-center">
+        <span class="text-2xl font-black text-amber-600 dark:text-amber-400 block" data-modal-marked>0</span>
+        <span class="text-[11px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">In Review</span>
+      </div>
+    </div>
+
+    <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-700/40 text-xs text-gray-600 dark:text-gray-300 leading-relaxed border border-gray-200 dark:border-gray-700">
+      ⚠️ <strong>Notice:</strong> Once submitted, your answers will be locked and cannot be changed. All unanswered questions will be marked with zero score.
+    </div>
+
+    <div class="mt-6 flex items-center justify-end gap-3">
+      <button type="button" onclick="CMS.closeModal('exam-submit-modal')" class="px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
+        Return to Exam
+      </button>
+      <button type="button" id="btn-modal-confirm-submit" class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">
+        Yes, Final Submit
+      </button>
+    </div>
+  </div>
+</div>

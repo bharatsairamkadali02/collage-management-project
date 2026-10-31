@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% set hide_navigation = true %}
+
+{% block title %}Examination Portal - Midterm 1 - CampusSphere CMS{% endblock %}
+
+{% block head_extra %}
+<style>
+  /* Distraction-Free Exam Security Modes */
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+</style>
+{% endblock %}
+
+{% block standalone_content %}
+<div class="min-h-screen bg-gray-100 dark:bg-gray-950 flex flex-col exam-mode" oncontextmenu="return false;">
+
+  <!-- Distraction-Free Header Bar -->
+  <header class="h-16 px-4 sm:px-8 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+    <div class="flex items-center gap-4">
+      <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
+        CS
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white leading-tight">
+          Midterm 1: Trees, Graphs & Dynamic Programming
+        </h1>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          Candidate: <strong>John Doe (21CS042)</strong> &bull; Course: <strong>CS301</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Timer & Anti-cheat Indicators -->
+    <div class="flex items-center gap-4">
+      <!-- Autosave indicator -->
+      <span id="exam-autosave-indicator" class="hidden sm:inline-block text-xs text-gray-400 font-medium"></span>
+
+      <!-- Tab Switch Warning Count -->
+      <div class="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400" title="Tab focus changes logged">
+        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Focus Loss: <strong id="exam-tab-switches" class="text-rose-500">0</strong></span>
+      </div>
+
+      <!-- Live Countdown Timer -->
+      <div id="exam-timer-box" class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all">
+        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:inline">Time Left:</span>
+        <span id="exam-timer-display" class="font-mono font-black text-sm sm:text-base text-gray-900 dark:text-white">
+          45:00
+        </span>
+      </div>
+
+      <!-- Submit Exam Top CTA -->
+      <button type="button" id="btn-submit-exam" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all">
+        Submit Exam
+      </button>
+    </div>
+  </header>
+
+  <!-- ACTIVE EXAM INTERFACE (Split 2-Column Responsive View) -->
+  <div id="exam-active-interface" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left Main Column: Question Statement & Options (2 cols) -->
+    <main class="lg:col-span-2 flex flex-col justify-between bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8 min-h-[500px]">
+      
+      <div>
+        <!-- Question Meta Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-black text-indigo-600 dark:text-indigo-400">
+              Question <span id="exam-current-qnum">1</span> of <span id="exam-total-qnum">20</span>
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold" id="exam-current-marks">
+              +2 / -0 Marks
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Mark For Review Button -->
+            <button type="button" id="btn-mark-review" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              <span>Mark for Review</span>
+            </button>
+
+            <!-- Clear Response Button -->
+            <button type="button" id="btn-clear-response" class="px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:text-rose-600 transition-colors">
+              Clear Response
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Statement -->
+        <div class="py-6">
+          <p id="exam-question-text" class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 leading-relaxed">
+            What is the worst-case time complexity of searching for an element in an AVL (self-balancing binary search) Tree with N nodes?
+          </p>
+        </div>
+
+        <!-- Answer Options Container (Populated by exam-timer.js) -->
+        <div id="exam-options-container" class="space-y-3 pt-2">
+          <!-- Option elements generated dynamically by ExamEngine -->
+        </div>
+      </div>
+
+      <!-- Question Navigation Footer Controls -->
+      <div class="pt-6 mt-8 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <button type="button" id="btn-prev-question" class="px-5 py-2.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+          &larr; Previous Question
+        </button>
+
+        <button type="button" id="btn-next-question" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all">
+          Next Question &rarr;
+        </button>
+      </div>
+    </main>
+
+    <!-- Right Sidebar Column: Question Palette & Legend (1 col) -->
+    <aside class="space-y-6">
+      
+      <!-- Question Palette Box -->
+      <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Question Palette</h3>
+        
+        <!-- Palette Grid (Buttons populated by exam-timer.js) -->
+        <div id="exam-question-palette" class="grid grid-cols-5 gap-2.5">
+          <!-- Dynamically generated palette buttons -->
+        </div>
+
+        <!-- Palette Status Legend -->
+        <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-700 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-emerald-600 inline-block"></span>
+              <span class="text-gray-700 dark:text-gray-300">Answered</span>
+            </span>
+            <span class="font-bold text-emerald-600" id="palette-count-answered">0</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-rose-500 inline-block"></span>
+              <span class="text-gray-700 dark:text-gray-300">Not Answered</span>
+            </span>
+            <span class="font-bold text-rose-500" id="palette-count-unanswered">0</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-amber-500 inline-block"></span>
+              <span class="text-gray-700 dark:text-gray-300">Marked for Review</span>
+            </span>
+            <span class="font-bold text-amber-500" id="palette-count-review">0</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-gray-200 dark:bg-gray-700 inline-block"></span>
+              <span class="text-gray-700 dark:text-gray-300">Not Visited</span>
+            </span>
+            <span class="font-bold text-gray-500" id="palette-count-notvisited">20</span>
+          </div>
+        </div>
+
+        <!-- Final Submit Action Button -->
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <button type="button" onclick="examInstance.confirmSubmitDialog()" class="w-full py-3 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 transition-all">
+            Review & Final Submit
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam Rules Card -->
+      <div class="p-5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-xs text-indigo-900 dark:text-indigo-200 space-y-2">
+        <h4 class="font-bold uppercase tracking-wider flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Exam Directives
+        </h4>
+        <ul class="list-disc pl-4 space-y-1 text-[11px] text-indigo-800 dark:text-indigo-300">
+          <li>Do not switch browser tabs or minimize window.</li>
+          <li>Right-click and text copy are strictly disabled.</li>
+          <li>Your responses are saved locally and synced continuously.</li>
+          <li>Exam automatically submits when timer hits 00:00.</li>
+        </ul>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- POST-EXAM RESULT & EXPLANATIONS VIEW (Hidden until submitted) -->
+  <div id="exam-result-interface" class="hidden flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 space-y-6">
+    <div class="p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xl text-center space-y-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mx-auto">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+
+      <h2 class="text-2xl font-black text-gray-900 dark:text-white">Exam Completed & Submitted!</h2>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+        Your attempt has been validated and recorded in the university evaluation database.
+      </p>
+
+      <!-- Score Card -->
+      <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto my-6 p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/40">
+        <div>
+          <span class="text-xs text-gray-400 font-semibold block uppercase">Total Score</span>
+          <span class="text-2xl font-black text-gray-900 dark:text-white" id="result-score-display">42 / 50</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-400 font-semibold block uppercase">Percentage</span>
+          <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400" id="result-pct-display">84%</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-400 font-semibold block uppercase">Evaluation</span>
+          <span class="mt-1 inline-block" id="result-status-badge">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">PASSED</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3">
+        <a href="{{ url_for('dashboard.student') }}" class="px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-all">
+          Return to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Explanations & Solutions Section -->
+    <div id="result-explanations-container" class="hidden p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-4">
+      <!-- Injected by ExamEngine if showAnswersAfter is true -->
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/exam-timer.js') }}"></script>
+<script>
+  // Mock questions dataset for the exam
+  const examQuestions = [
+    {
+      id: 'Q1',
+      text: 'What is the worst-case time complexity of searching for an element in an AVL (self-balancing binary search) Tree with N nodes?',
+      marks: 2,
+      negative_marks: 0,
+      options: {
+        A: 'O(n)',
+        B: 'O(log n)',
+        C: 'O(n log n)',
+        D: 'O(1)'
+      },
+      correct_answer: 'B',
+      explanation: 'In an AVL tree, the height is strictly maintained as O(log n). Therefore, searching takes at most O(log n) time in the worst case.'
+    },
+    {
+      id: 'Q2',
+      text: 'Which traversal of a Binary Search Tree (BST) visits nodes in strictly ascending numerical order?',
+      marks: 2,
+      negative_marks: 0,
+      options: {
+        A: 'Inorder Traversal (Left, Root, Right)',
+        B: 'Preorder Traversal (Root, Left, Right)',
+        C: 'Postorder Traversal (Left, Right, Root)',
+        D: 'Level Order Traversal'
+      },
+      correct_answer: 'A',
+      explanation: 'Inorder traversal processes the left subtree (smaller elements), then the current node, then the right subtree (larger elements), yielding sorted order.'
+    },
+    {
+      id: 'Q3',
+      text: 'Which data structure is primarily utilized in Breadth First Search (BFS) graph traversal?',
+      marks: 2,
+      negative_marks: 0,
+      options: {
+        A: 'Stack (LIFO)',
+        B: 'Binary Min-Heap',
+        C: 'Queue (FIFO)',
+        D: 'Doubly Linked List'
+      },
+      correct_answer: 'C',
+      explanation: 'BFS explores vertices level by level, necessitating a FIFO Queue structure to explore adjacent vertices in the sequence they were discovered.'
+    },
+    {
+      id: 'Q4',
+      text: 'What is the optimal time complexity to find the Shortest Path from a single source in an unweighted graph?',
+      marks: 2,
+      negative_marks: 0,
+      options: {
+        A: 'O(V + E) using Breadth First Search',
+        B: 'O(E log V) using Dijkstra Algorithm',
+        C: 'O(V^3) using Floyd-Warshall Algorithm',
+        D: 'O(V * E) using Bellman-Ford Algorithm'
+      },
+      correct_answer: 'A',
+      explanation: 'For unweighted graphs, simple BFS computes single-source shortest path distances in linear O(V + E) time.'
+    },
+    {
+      id: 'Q5',
+      text: 'In 0/1 Knapsack problem with N items and maximum weight capacity W, what is the Dynamic Programming time complexity?',
+      marks: 2,
+      negative_marks: 0,
+      options: {
+        A: 'O(2^N)',
+        B: 'O(N * W)',
+        C: 'O(N log N)',
+        D: 'O(W^2)'
+      },
+      correct_answer: 'B',
+      explanation: 'The 2D dynamic programming table has dimensions (N+1) x (W+1), requiring O(N * W) pseudo-polynomial time.'
+    }
+  ];
+
+  // Initialize the Exam Engine
+  document.addEventListener('DOMContentLoaded', () => {
+    window.examInstance = new ExamEngine({
+      examId: 'CS301_MID1',
+      durationSeconds: 2700, // 45 minutes
+      questions: examQuestions,
+      showAnswersAfter: true,
+      submitUrl: '/api/submissions/CS301_MID1/submit',
+      saveUrl: '/api/submissions/CS301_MID1/answer'
+    });
+  });
+</script>
+{% endblock %}

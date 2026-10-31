@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Profile - John Doe - CampusSphere CMS{% endblock %}
+{% block page_title %}Student 360&deg; Profile{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Profile Hero Header Card -->
+  <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      
+      <div class="flex items-start sm:items-center gap-5">
+        <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-extrabold shadow-xl shadow-indigo-600/30 flex-shrink-0">
+          JD
+          <span class="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-gray-800" title="Active Student"></span>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">John Doe</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+              ACTIVE
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+            Roll No: 21CS042 &bull; Reg No: CS2021008492
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            B.Tech Computer Science & Engineering &bull; Semester 5, Section A &bull; Batch 2023-2027
+          </p>
+        </div>
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="flex flex-wrap items-center gap-3 no-print">
+        <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Print Profile</span>
+        </button>
+
+        {% if current_user and current_user.role in ['admin', 'faculty'] %}
+          <a href="{{ url_for('students.form') }}?edit=21CS042" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span>Edit Profile</span>
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cumulative GPA</span>
+      <p class="mt-2 text-3xl font-black text-indigo-600 dark:text-indigo-400">8.74 <span class="text-sm font-semibold text-gray-400">/ 10</span></p>
+      <span class="text-[11px] text-gray-500">First Class with Distinction</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Attendance Overall</span>
+      <p class="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">84.2%</p>
+      <span class="text-[11px] text-emerald-600 font-semibold">142 of 170 sessions attended</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Credits Earned</span>
+      <p class="mt-2 text-3xl font-black text-gray-900 dark:text-white">92 Credits</p>
+      <span class="text-[11px] text-gray-500">Zero backlogs &bull; Clear record</span>
+    </div>
+
+    <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Fee Account</span>
+      <p class="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">PAID</p>
+      <span class="text-[11px] text-gray-500">Receipt #FE-2026-9042</span>
+    </div>
+  </div>
+
+  <!-- Detailed 2-Column Info Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Column 1: Personal & Guardian Info -->
+    <div class="space-y-6">
+      <!-- Personal Details -->
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          Personal Information
+        </h3>
+        <dl class="space-y-3 text-xs">
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Email Address</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">john.doe@student.college.edu</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Phone Number</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">+1 (555) 234-5678</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Date of Birth</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">May 15, 2004 (Age 22)</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Gender & Blood Group</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">Male &bull; O Positive (O+)</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Residential Address</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-medium mt-0.5">742 Evergreen Terrace, Springfield, OR 97477</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Guardian Details -->
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          Emergency Contact / Guardian
+        </h3>
+        <dl class="space-y-3 text-xs">
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Guardian Name</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">Robert Doe (Father)</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Guardian Contact</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">+1 (555) 111-2222</dd>
+          </div>
+          <div>
+            <dt class="text-gray-400 uppercase font-semibold">Guardian Email</dt>
+            <dd class="text-gray-900 dark:text-gray-100 font-bold mt-0.5">robert.doe@example.com</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Column 2 & 3: Current Course Enrolments & Semester Progress -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Current Courses Table -->
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          Current Enrolled Courses (Semester 5)
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-gray-400 uppercase tracking-wider">
+              <tr>
+                <th class="py-2.5 px-3">Code</th>
+                <th class="py-2.5 px-3">Course Title</th>
+                <th class="py-2.5 px-3">Credits</th>
+                <th class="py-2.5 px-3">Faculty Instructor</th>
+                <th class="py-2.5 px-3 text-center">Attendance</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700 font-medium">
+              <tr>
+                <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS301</td>
+                <td class="py-3 px-3 font-semibold text-gray-900 dark:text-white">Data Structures & Algorithms</td>
+                <td class="py-3 px-3">4</td>
+                <td class="py-3 px-3 text-gray-500">Prof. Alan Turing</td>
+                <td class="py-3 px-3 text-center">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">89.2%</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS402</td>
+                <td class="py-3 px-3 font-semibold text-gray-900 dark:text-white">Database Management Systems</td>
+                <td class="py-3 px-3">4</td>
+                <td class="py-3 px-3 text-gray-500">Prof. Edgar Codd</td>
+                <td class="py-3 px-3 text-center">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">68.5% ⚠️</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">CS408</td>
+                <td class="py-3 px-3 font-semibold text-gray-900 dark:text-white">Cloud Computing Architecture</td>
+                <td class="py-3 px-3">3</td>
+                <td class="py-3 px-3 text-gray-500">Dr. Werner Vogels</td>
+                <td class="py-3 px-3 text-center">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">92.0%</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">MA301</td>
+                <td class="py-3 px-3 font-semibold text-gray-900 dark:text-white">Discrete Mathematical Structures</td>
+                <td class="py-3 px-3">3</td>
+                <td class="py-3 px-3 text-gray-500">Prof. Ada Lovelace</td>
+                <td class="py-3 px-3 text-center">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">85.7%</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Semester SGPA Progression Card -->
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          Historical GPA Progression
+        </h3>
+        <div class="grid grid-cols-4 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+            <span class="text-xs text-gray-400 font-semibold block">Semester 1</span>
+            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">8.42</span>
+            <span class="text-[10px] text-gray-400 block">22 Credits</span>
+          </div>
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+            <span class="text-xs text-gray-400 font-semibold block">Semester 2</span>
+            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">8.65</span>
+            <span class="text-[10px] text-gray-400 block">24 Credits</span>
+          </div>
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+            <span class="text-xs text-gray-400 font-semibold block">Semester 3</span>
+            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">8.70</span>
+            <span class="text-[10px] text-gray-400 block">23 Credits</span>
+          </div>
+          <div class="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60">
+            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold block">Semester 4</span>
+            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">8.90</span>
+            <span class="text-[10px] text-indigo-500 block">23 Credits</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

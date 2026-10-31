@@ -1,0 +1,89 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DynamoDBTableAndIndexOperations",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_users",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_users/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_students",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_students/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_attendance",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_attendance/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_results",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_results/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_exams",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_exams/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_questions",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_questions/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_submissions",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_submissions/index/*",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_audit_logs",
+        "arn:aws:dynamodb:{REGION}:{ACCOUNT_ID}:table/cms_audit_logs/index/*"
+      ]
+    },
+    {
+      "Sid": "S3BucketLevelOperations",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::cms-college-data-{ACCOUNT_ID}"
+    },
+    {
+      "Sid": "S3ObjectLevelOperations",
+      "Effect": "Allow",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::cms-college-data-{ACCOUNT_ID}/*"
+    },
+    {
+      "Sid": "CloudWatchLogGroupOperations",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:{REGION}:{ACCOUNT_ID}:log-group:/college-mgmt/*"
+    },
+    {
+      "Sid": "CloudWatchLogStreamOperations",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:{REGION}:{ACCOUNT_ID}:log-group:/college-mgmt/*:log-stream:*"
+    },
+    {
+      "Sid": "CloudWatchMetricsPublishing",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "arn:aws:cloudwatch:{REGION}:{ACCOUNT_ID}:*",
+      "Condition": {
+        "StringEquals": {
+          "cloudwatch:namespace": "CMS/Application"
+        }
+      }
+    }
+  ]
+}

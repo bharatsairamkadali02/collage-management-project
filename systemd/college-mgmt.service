@@ -1,0 +1,55 @@
+[Unit]
+Description=College Management System - Gunicorn Eventlet Service
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cms
+Group=cms
+WorkingDirectory=/opt/college-mgmt
+EnvironmentFile=/etc/college-mgmt.env
+
+# Execution command using virtualenv gunicorn with eventlet worker
+ExecStart=/opt/college-mgmt/venv/bin/gunicorn \
+    --worker-class eventlet \
+    --workers 1 \
+    --bind 127.0.0.1:5000 \
+    --worker-connections 1000 \
+    --timeout 120 \
+    --keep-alive 5 \
+    --access-logfile /var/log/college-mgmt/gunicorn-access.log \
+    --error-logfile /var/log/college-mgmt/gunicorn-error.log \
+    --capture-output \
+    --log-level info \
+    wsgi:app
+
+# Lifecycle and Auto-Restart policy
+Restart=always
+RestartSec=5s
+KillSignal=SIGQUIT
+TimeoutStopSec=30
+
+# File descriptor and process limits
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# Security Hardening Sandbox
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/log/college-mgmt /opt/college-mgmt
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Standard Output / Error configuration
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=college-mgmt
+
+[Install]
+WantedBy=multi-user.target

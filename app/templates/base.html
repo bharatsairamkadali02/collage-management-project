@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="csrf-token" content="{{ csrf_token() if csrf_token is defined else '' }}">
+  <title>{% block title %}CampusSphere - College Management System{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN with dark mode config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Socket.IO CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200">
+
+  <!-- Toast Notification Container (Fixed Top-Right) -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none w-full max-w-sm sm:max-w-md" aria-live="assertive"></div>
+
+  {# Check if navigation should be hidden (for exam mode or standalone auth) #}
+  {% if hide_navigation %}
+    <main class="min-h-screen">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+            {% for category, message in messages %}
+              <div class="flash-message mb-3 p-4 rounded-xl text-sm font-semibold flex items-center justify-between border shadow-sm {% if category == 'error' or category == 'danger' %}bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/60 dark:border-rose-800 dark:text-rose-200{% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800 dark:text-emerald-200{% elif category == 'warning' %}bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/60 dark:border-amber-800 dark:text-amber-200{% else %}bg-indigo-50 border-indigo-200 text-indigo-800 dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200{% endif %}">
+                <span>{{ message }}</span>
+                <button type="button" onclick="this.parentElement.remove()" class="p-1 opacity-70 hover:opacity-100">&times;</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block standalone_content %}{% endblock %}
+    </main>
+  {% else %}
+    <!-- App Shell Layout -->
+    <div class="min-h-screen flex flex-col lg:flex-row">
+      <!-- Sidebar Navigation -->
+      {% include 'components/sidebar.html' %}
+
+      <!-- Main Layout Body (Pushed by sidebar on desktop) -->
+      <div class="flex-1 lg:pl-64 flex flex-col min-w-0">
+        <!-- Top Navbar -->
+        {% include 'components/navbar.html' %}
+
+        <!-- Flash Messages Display -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="px-4 sm:px-6 pt-4">
+              {% for category, message in messages %}
+                <div class="flash-message mb-3 p-4 rounded-xl text-sm font-medium flex items-center justify-between border shadow-sm {% if category == 'error' or category == 'danger' %}bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/60 dark:border-rose-800 dark:text-rose-200{% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800 dark:text-emerald-200{% elif category == 'warning' %}bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/60 dark:border-amber-800 dark:text-amber-200{% else %}bg-indigo-50 border-indigo-200 text-indigo-800 dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-200{% endif %}">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ message }}</span>
+                  </div>
+                  <button type="button" onclick="this.parentElement.remove()" class="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors" aria-label="Dismiss alert">&times;</button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Main Content Slot -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="py-4 px-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-500 dark:text-gray-400 no-print">
+          CampusSphere College Management System &bull; Version 2.4.0 &bull; Secure Enterprise Campus Solution
+        </footer>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Global Reusable Modals -->
+  {% include 'components/modals.html' %}
+
+  <!-- Core App JS -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+  <!-- Page-specific scripts -->
+  {% block scripts %}{% endblock %}
+</body>
+</html>
